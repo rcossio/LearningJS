@@ -8,6 +8,12 @@ let meal4;
 let meal5;
 let meal6;
 let meal7;
+const totalMacros = { 
+    proteins:0,
+    fats:0,
+    carbs:0,
+    calories: function () {return (this.proteins+this.carbs)*4+this.fats*9; } 
+    }
 
 function mealChecker (meal){
     /* Returns true if input is acceptable (meal/empty or cancel button) */
@@ -87,6 +93,11 @@ do {
         mealObj = getMealObj(meal)
         console.log("You entered the meal "+meal+". With "+mealObj.proteins+" proteins, "+mealObj.fats+" fats, and "+mealObj.carbs+" carbs.");
 
+        /* Calculating total macros*/
+        totalMacros.proteins += mealObj.proteins;
+        totalMacros.fats += mealObj.fats;
+        totalMacros.carbs += mealObj.carbs;
+
         /* Parte que googlee de ansioso pero que aun no vimos */
         document.getElementsByClassName("name-span")[mealCounter-1].textContent=mealObj.name;
         document.getElementsByClassName("proteins-span")[mealCounter-1].textContent=mealObj.proteins;
@@ -106,3 +117,4 @@ do {
     
 } while (meal != "");
 
+alert("The quantity of calories in this plan is "+totalMacros.calories()+" with "+totalMacros.proteins+" proteins, "+totalMacros.fats+" fats, and "+totalMacros.carbs+" carbs.")
