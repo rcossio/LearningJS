@@ -22,19 +22,12 @@ function mealChecker (meal){
     }
     switch (meal.toLowerCase()) {
         case "guiso":
-            return true;
         case "tacos":
-            return true;
         case "lasagna":
-            return true;
         case "pizza":
-            return true;
         case "ravioles":
-            return true;
         case "ensalada":
-            return true;
         case "fideos":
-            return true;
         case "":
             return true;
         default:
