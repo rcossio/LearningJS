@@ -7,11 +7,13 @@ const totalMacros = {
     carbs: 0,
     calories: function () { return (this.proteins + this.carbs) * 4 + this.fats * 9; }
 }
+/* Defines mealNameArray, which is the array of possible input meals*/
+/* It is defined as a global variable instead of inside mealChecker so it wont be defined on every prompt */
+let mealNameArray = mealList.map( (item) => item.name )
+mealNameArray.push("")
 
 function mealChecker(meal) {
     /* Returns true if input is acceptable (meal,empty or cancel button) */
-    let mealNameArray = mealList.map( (item) => item.name )
-    mealNameArray.push("")
     if (meal == null) {
         return true
     } else if (mealNameArray.includes(meal.toLowerCase())) {
