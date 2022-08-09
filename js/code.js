@@ -7,10 +7,6 @@ const totalMacros = {
     carbs: 0,
     calories: function () { return (this.proteins + this.carbs) * 4 + this.fats * 9; }
 }
-/* Defines mealNameArray, which is the array of possible input meals*/
-/* It is defined as a global variable instead of inside mealChecker so it wont be defined on every prompt */
-let mealNameArray = mealList.map( (item) => item.name )
-mealNameArray.push("")
 
 function mealChecker(meal) {
     /* Returns true if input is acceptable (meal,empty or cancel button) */
@@ -33,7 +29,7 @@ class Meal {
 
 function getMealObj(meal) {
     /* Returns meal object by finding it from its name */
-    return mealList.find((elem) => elem.name === meal)
+    return mealList.find((elem) => elem.name === meal.toLowerCase())
 }
 
 /* Creating (fake) meals. This should be read from a table or database in the future*/
@@ -45,6 +41,17 @@ mealList.push( new Meal("ravioles", 15, 25, 35))
 mealList.push( new Meal("ensalada", 16, 26, 36))
 mealList.push( new Meal("fideos", 17, 27, 37)  )
 
+/* Defines mealNameArray, which is the array of possible input meals*/
+/* It is defined as a global variable instead of inside mealChecker so it wont be defined on every prompt */
+let mealNameArray = mealList.map( (item) => item.name )
+mealNameArray.push("")
+
+/* Agreement to use test script */
+let accepted = confirm("This site is not currently working with real nutritional information. Do you still want to enter the site?")
+if (!accepted) {
+    /* Aun no vimos esto pero tambien lo google, no se si hay una mejor forma de terminar el script */
+    throw new Error("The user didn't accept to run the script");
+}
 
 /* Reading the input*/
 do {
