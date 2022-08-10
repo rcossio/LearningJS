@@ -20,7 +20,7 @@
                   <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
-                    <th scope="col">Portions</th>
+                    <th scope="col">Servings</th>
                     <th scope="col">Protein(g)</th>
                     <th scope="col">Fat(g)</th>
                     <th scope="col">Carbs(g)</th>
@@ -29,46 +29,72 @@
                 <tbody>
                   <tr>
                     <th scope="row">1</th>
-                    <td class="name-span">---</td>
-                    <td class="portion-span"></td>
+                    <td class="name-span">
+                      <input type="text" list="meals-available" class="meal-selection" />
+                      <datalist id="meals-available">
+                      </datalist>
+                    </td>
+                    <td>
+                      <input type="number" min="0" max="99" class="serving-span">
+                    </td>
                     <td class="proteins-span"></td>
                     <td class="fats-span"></td>
                     <td class="carbs-span"></td>
                   </tr>
                   <tr>
                     <th scope="row">2</th>
-                    <td class="name-span">---</td>
-                    <td class="portion-span"></td>
+                    <td class="name-span">
+                      <input type="text" list="meals-available" class="meal-selection" />
+                    </td>
+                    <td>
+                      <input type="number" min="0" max="99" class="serving-span">
+                    </td>
                     <td class="proteins-span"></td>
                     <td class="fats-span"></td>
                     <td class="carbs-span"></td>
                   </tr>
                   <tr>
                     <th scope="row">3</th>
-                    <td class="name-span">---</td>
-                    <td class="portion-span"></td>
+                    <td class="name-span">
+                      <input type="text" list="meals-available" class="meal-selection" />
+                    </td>
+                    <td>
+                      <input type="number" min="0" max="99" class="serving-span">
+                    </td>
                     <td class="proteins-span"></td>
                     <td class="fats-span"></td>
                     <td class="carbs-span"></td>
                   </tr>
                   <tr>
                     <th scope="row">4</th>
-                    <td class="name-span">---</td>
-                    <td class="portion-span"></td>
+                    <td class="name-span">
+                      <input type="text" list="meals-available" class="meal-selection" />
+                    </td>
+                    <td>
+                      <input type="number" min="0" max="99" class="serving-span">
+                    </td>
                     <td class="proteins-span"></td>
                     <td class="fats-span"></td>
                     <td class="carbs-span"></td>
                   </tr>
                   <tr>
                     <th scope="row">5</th>
-                    <td class="name-span">---</td>
-                    <td class="portion-span"></td>
+                    <td class="name-span">
+                      <input type="text" list="meals-available" class="meal-selection" />
+                    </td>
+                    <td>
+                      <input type="number" min="0" max="99" class="serving-span">
+                    </td>
                     <td class="proteins-span"></td>
                     <td class="fats-span"></td>
                     <td class="carbs-span"></td>
                   </tr>
                 </tbody>
             </table>
+        </section>
+        <section class="d-flex flex-column align-items-center">
+          <button type="button" class="btn btn-secondary my-3 mx-auto">Calculate! (this button is not working yet)</button>
+          <p id="calories-calculation" class="mb-4"></p>  
         </section>
     </main>
     <footer class="container-fluid bg-dark pt-3">

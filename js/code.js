@@ -2,6 +2,7 @@ let meal;
 let mealCounter = 0;
 const mealList = [];
 const totalMacros = {
+    /* proteins, fats and carbs are Per Serving Size */
     proteins: 0,
     fats: 0,
     carbs: 0,
@@ -9,27 +10,45 @@ const totalMacros = {
 }
 
 function mealChecker(meal) {
-    /* Returns true if input is acceptable (meal,empty or cancel button) */
-    if (meal == null) {
-        return true
-    } else if (mealNameArray.includes(meal.toLowerCase())) {
+    /* Returns true if input is acceptable (meal or empty) */
+    if (mealNameArray.includes(meal.toLowerCase())) {
         return true
     } else {
         return false
     }
 };
 
-class Meal {
-    constructor (name, proteins, fats, carbs) {
-        this.name = name;
-        this.proteins = proteins;
-        this.fats = fats;
-        this.carbs = carbs;}
-}
-
 function getMealObj(meal) {
     /* Returns meal object by finding it from its name */
     return mealList.find((elem) => elem.name === meal.toLowerCase())
+}
+
+function setInvalidMeal(index){
+    /* Used to established a dash where the input is invalid */
+    document.getElementsByClassName("proteins-span")[index].textContent = "-";
+    document.getElementsByClassName("fats-span")[index].textContent = "-";
+    document.getElementsByClassName("carbs-span")[index].textContent = "-";
+}
+
+class Meal {
+    constructor (name, proteins, fats, carbs) {
+        /* Proteins, fats and carbs are Per Serving Size */
+        this.name = name;
+        this.proteins = proteins;
+        this.fats = fats;
+        this.carbs = carbs;
+        this.servings = 0;
+    }
+
+    setServings(servings){
+        this.servings = servings;
+    }
+
+    totalProteins(){ return this.proteins*this.servings; }
+
+    totalFats(){ return this.fats*this.servings; }
+
+    totalCarbs(){ return this.carbs*this.servings; }
 }
 
 /* Creating (fake) meals. This should be read from a table or database in the future*/
@@ -44,7 +63,15 @@ mealList.push( new Meal("fideos", 17, 27, 37)  )
 /* Defines mealNameArray, which is the array of possible input meals*/
 /* It is defined as a global variable instead of inside mealChecker so it wont be defined on every prompt */
 let mealNameArray = mealList.map( (item) => item.name )
-mealNameArray.push("")
+mealNameArray.unshift("")
+
+/* Loads the page with the possible meals */
+let availableMeals = document.getElementById("meals-available");
+for (let mealName of mealNameArray) {
+    let mealNewOption = document.createElement("option");
+    mealNewOption.innerHTML = mealName;
+    availableMeals.append(mealNewOption);
+}
 
 /* Agreement to use test script */
 let accepted = confirm("This site is not currently working with real nutritional information. Do you still want to enter the site?")
@@ -54,39 +81,34 @@ if (!accepted) {
 }
 
 /* Reading the input*/
-do {
-    meal = prompt("Write the meals one by one\r\nYou can choose between theese meals:\r\n      - Guiso\r\n      - Tacos\r\n      - Lasagna\r\n      - Pizza\r\n      - Ravioles\r\n      - Ensalada\r\n      - Fideos\r\n(max 5, leave empty to exit)");
+for (let mealInput of document.getElementsByClassName("meal-selection")) {
+    let meal = mealInput.value;
     let passed = mealChecker(meal);
 
-    if ((meal == "") || (meal == null)) {
-        alert("You didn't enter a meal, exiting...");
-        break
-    } else if (passed) {
-        mealCounter++
-        mealObj = getMealObj(meal)
-        console.log("You entered the meal " + meal + ". With " + mealObj.proteins + " proteins, " + mealObj.fats + " fats, and " + mealObj.carbs + " carbs.");
+    mealCounter++;
 
-        /* Calculating total macros*/
-        totalMacros.proteins += mealObj.proteins;
-        totalMacros.fats += mealObj.fats;
-        totalMacros.carbs += mealObj.carbs;
-
-        /* Parte que googlee de ansioso pero que aun no vimos */
-        document.getElementsByClassName("name-span")[mealCounter - 1].textContent = mealObj.name;
-        document.getElementsByClassName("proteins-span")[mealCounter - 1].textContent = mealObj.proteins;
-        document.getElementsByClassName("fats-span")[mealCounter - 1].textContent = mealObj.fats;
-        document.getElementsByClassName("carbs-span")[mealCounter - 1].textContent = mealObj.carbs;
-
-        if (mealCounter >= 5) {
-            alert("Good job! You entered all 5 meals.");
-            break
-        }
-    } else {
-        alert("You didn't enter a valid meal, try again.");
-        continue
+    if ((meal == "") || (!passed)) {
+        mealInput.style.background = "rgba(255,0,0,0.3)"
+        setInvalidMeal(mealCounter - 1);
+        continue;
     }
+    
+    mealObj = getMealObj(meal)
+    mealObj.setServings(document.getElementsByClassName("serving-span")[mealCounter - 1].value);
 
+    /* Calculating total macros*/
+    totalMacros.proteins += mealObj.totalProteins();
+    totalMacros.fats += mealObj.totalFats();
+    totalMacros.carbs += mealObj.totalCarbs();
 
-} while (meal != "");
+    /* Set nutriend values in the table */
+    document.getElementsByClassName("proteins-span")[mealCounter - 1].textContent = mealObj.totalProteins();
+    document.getElementsByClassName("fats-span")[mealCounter - 1].textContent = mealObj.totalFats();
+    document.getElementsByClassName("carbs-span")[mealCounter - 1].textContent = mealObj.totalCarbs();
 
-alert("The quantity of calories in this plan is " + totalMacros.calories() + " with " + totalMacros.proteins + " proteins, " + totalMacros.fats + " fats, and " + totalMacros.carbs + " carbs.")
+    if (mealCounter >= 5) {
+        break;
+    }
+}
+
+document.getElementById("calories-calculation").textContent = "The quantity of calories in this plan is " + totalMacros.calories() + " with " + totalMacros.proteins + " proteins, " + totalMacros.fats + " fats, and " + totalMacros.carbs + " carbs.";
