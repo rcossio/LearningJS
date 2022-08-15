@@ -67,8 +67,8 @@ for (const node of document.getElementsByClassName("serving-span")){
 let foodCarrousel = document.getElementById("food-carrousel");
 for (let index of randomIndices(4,foodObjArray.length)) {
     foodCarrousel.innerHTML += cardHtml(foodObjArray[index]);
+    addFoodButton (foodObjArray[index].name);
 }
-setBtnfunctions ();
 
 /* Get array of random indices */
 function randomIndices(size,maxnum){
@@ -95,24 +95,22 @@ function cardHtml (foodObj){
     </div>`;
 }
 
-/* Food buttons add foods to list */
-function setBtnfunctions (){
-    for (let foodName of foodNameArray) {
-        let button = document.getElementById("button-"+foodName.toLowerCase());
-        if (!(button === null)) {
-            button.onclick = () => {
-                for (let i=0; i<5; i++) {
-                    let inputBox = document.getElementsByClassName("food-selection")[i];
-                    if (inputBox.value === ""){
-                        inputBox.value = foodName;
-                        document.getElementsByClassName("serving-span")[i].value = 1;
-                        break
-                    }
-                }
-            };
+/* Adds effect to add buttons to foods*/
+function addFoodButton(foodName) {
+    let button = document.getElementById("button-"+foodName.toLowerCase());
+    button.onclick = () => {
+        for (let i=0; i<5; i++) {
+            let inputBox = document.getElementsByClassName("food-selection")[i];
+            if (inputBox.value === ""){
+                inputBox.value = foodName;
+                document.getElementsByClassName("serving-span")[i].value = 1;
+                break
+            }
         }
     }
+    console.log(button)
 }
+
 
 /* Runs main function by pressing button (lo vimos en el afterclass del miercoles) */
 let calculateButton = document.getElementById("calculateMacros-btn");
@@ -186,6 +184,6 @@ inputBox.addEventListener("input",() => {
     foodCarrousel.innerHTML = "";
     for (let i=0; i< Math.min(4,filteredArray.length) ; i++) {
         foodCarrousel.innerHTML += cardHtml(filteredArray[i]);
+        addFoodButton (filteredArray[i].name);
     }
-    setBtnfunctions ();
 } );
