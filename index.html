@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food nutrient calculator</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
 </head>
 <body>
@@ -14,6 +14,11 @@
         <p class="d-flex justify-content-center">Let's calculate your macros! </p>
     </header>
     <main class="container-lg">
+        <section class="d-flex gap-1 justify-content-center">
+          <input type="text" placeholder="Type food to browse" id="searchFoodBox"/>
+        </section>
+        <section id="section-show-foods" class="d-flex gap-2 my-3 justify-content-center">
+        </section>
         <section>
             <table class="table">
                 <thead>
@@ -30,8 +35,8 @@
                   <tr>
                     <th scope="row">1</th>
                     <td class="name-span">
-                      <input type="text" list="meals-available" class="meal-selection" />
-                      <datalist id="meals-available">
+                      <input type="text" list="foods-available" class="food-selection" />
+                      <datalist id="foods-available">
                       </datalist>
                     </td>
                     <td>
@@ -44,7 +49,7 @@
                   <tr>
                     <th scope="row">2</th>
                     <td class="name-span">
-                      <input type="text" list="meals-available" class="meal-selection" />
+                      <input type="text" list="foods-available" class="food-selection" />
                     </td>
                     <td>
                       <input type="number" min="0" max="99" class="serving-span">
@@ -56,7 +61,7 @@
                   <tr>
                     <th scope="row">3</th>
                     <td class="name-span">
-                      <input type="text" list="meals-available" class="meal-selection" />
+                      <input type="text" list="foods-available" class="food-selection" />
                     </td>
                     <td>
                       <input type="number" min="0" max="99" class="serving-span">
@@ -68,7 +73,7 @@
                   <tr>
                     <th scope="row">4</th>
                     <td class="name-span">
-                      <input type="text" list="meals-available" class="meal-selection" />
+                      <input type="text" list="foods-available" class="food-selection" />
                     </td>
                     <td>
                       <input type="number" min="0" max="99" class="serving-span">
@@ -80,7 +85,7 @@
                   <tr>
                     <th scope="row">5</th>
                     <td class="name-span">
-                      <input type="text" list="meals-available" class="meal-selection" />
+                      <input type="text" list="foods-available" class="food-selection" />
                     </td>
                     <td>
                       <input type="number" min="0" max="99" class="serving-span">
