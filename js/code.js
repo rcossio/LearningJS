@@ -28,8 +28,8 @@ class Food {
 }
 
 /* Asks user for permission to run the script */
-let accepted = confirm("This site is not currently working with real nutritional information. Do you still want to enter the site?")
-if (!accepted) {
+let acceptedTerms = confirm("This site is not currently working with real nutritional information. Do you still want to enter the site?")
+if (!acceptedTerms) {
     /* Aun no vimos esto que googlee, no se si hay una mejor forma de terminar el script */
     throw new Error("The user didn't accept to run the script");
 }
@@ -44,46 +44,58 @@ foodObjArray.push( new Food("Ravioles", 15, 25, 35,"./img/ravioles.webp"))
 foodObjArray.push( new Food("Ensalada", 16, 26, 36,"./img/ensalada.webp"))
 foodObjArray.push( new Food("Fideos", 17, 27, 37,"./img/fideos.webp")  )
 
-/* Defines available foods to input*/
+/* Define array of food names*/
 let foodNameArray = foodObjArray.map( (item) => item.name )
 foodNameArray.unshift("")
 
-/* Loads the page with available foods */
-let foodDatalist = document.getElementById("foods-available");
+/* Loads food options */
+let foodDatalist = document.getElementById("food-options");
 for (let foodName of foodNameArray) {
     foodDatalist.innerHTML += `<option>${foodName}</option>`;
 }
 
-/* Cleans previos inputs on reload */
+/* Cleans forms on page reload */
 document.getElementById("searchFoodBox").value = null;
-for (let i=0; i<5; i++) {
-    document.getElementsByClassName("food-selection")[i].value = "";
-    document.getElementsByClassName("serving-span")[i].value = null;
+for (const node of document.getElementsByClassName("food-selection")){
+    node.value=null;
+}
+for (const node of document.getElementsByClassName("serving-span")){
+    node.value=null;
 }
 
-
-/* Show at random first initial foods*/
-let sectionToShowFoods = document.getElementById("section-show-foods")
-usedIndices = []
-for (let i=1; i<5; i++) {
-    let index = Math.floor(Math.random()*foodObjArray.length)
-    if (usedIndices.includes(index)) {
-        i--;
-        continue
-    } 
-    usedIndices.push(index)
-    sectionToShowFoods.innerHTML += `
-    <div class="card" style="width: 10rem">
-    <img src="${foodObjArray[index].image}" class="card-img-top" alt="Image of a food" style="height: 8rem;">
-    <div class="card-body mx-auto text-center">
-      <h5 class="card-title">${foodObjArray[index].name}</h5>
-      <button class="btn btn-secondary" id="button-${foodObjArray[index].name.toLowerCase()}">Agregar</a>
-    </div>
-    </div>`;
+/* Shows initial foods randomly*/
+let foodCarrousel = document.getElementById("food-carrousel");
+for (let index of randomIndices(4,foodObjArray.length)) {
+    foodCarrousel.innerHTML += cardHtml(foodObjArray[index]);
 }
 setBtnfunctions ();
 
-/* Adds effect to add buttons to foods*/
+/* Get array of random indices */
+function randomIndices(size,maxnum){
+    let indices = [];
+    while (indices.length < size) {
+        let index = Math.floor(Math.random()*maxnum);
+        if (indices.includes(index)) {
+            continue;
+        };
+        indices.push(index);
+    }    
+    return indices;
+};
+
+/* Defines string of a card */
+function cardHtml (foodObj){
+    return `
+    <div class="card" style="width: 10rem">
+    <img src="${foodObj.image}" class="card-img-top" alt="Image of a food" style="height: 8rem;">
+    <div class="card-body mx-auto text-center">
+      <h5 class="card-title">${foodObj.name}</h5>
+      <button class="btn btn-secondary" id="button-${foodObj.name.toLowerCase()}">Agregar</a>
+    </div>
+    </div>`;
+}
+
+/* Food buttons add foods to list */
 function setBtnfunctions (){
     for (let foodName of foodNameArray) {
         let button = document.getElementById("button-"+foodName.toLowerCase());
@@ -101,7 +113,6 @@ function setBtnfunctions (){
         }
     }
 }
-
 
 /* Runs main function by pressing button (lo vimos en el afterclass del miercoles) */
 let calculateButton = document.getElementById("calculateMacros-btn");
@@ -150,7 +161,7 @@ function calculateMacros(){
         foodInput.style.background = null
         
         /* Sums up macronutrients*/
-        foodObj = getFoodObj(food)
+        const foodObj = getFoodObj(food)
         foodObj.setServings(document.getElementsByClassName("serving-span")[index].value);
         totalMacros.proteins += foodObj.totalProteins();
         totalMacros.fats += foodObj.totalFats();
@@ -171,19 +182,10 @@ function calculateMacros(){
 let inputBox = document.getElementById("searchFoodBox");
 inputBox.addEventListener("input",() => {
     let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(inputBox.value.toLowerCase()));
-    let sectionToShowFoods = document.getElementById("section-show-foods")
-    sectionToShowFoods.innerHTML = "";
+    let foodCarrousel = document.getElementById("food-carrousel")
+    foodCarrousel.innerHTML = "";
     for (let i=0; i< Math.min(4,filteredArray.length) ; i++) {
-        sectionToShowFoods.innerHTML += `
-        <div class="card" style="width: 10rem">
-        <img src="${filteredArray[i].image}" class="card-img-top" alt="Image of a food" style="height: 8rem;">
-        <div class="card-body">
-        <h5 class="card-title">${filteredArray[i].name}</h5>
-        <button class="btn btn-secondary" id="button-${filteredArray[i].name.toLowerCase()}">Agregar</a>
-        </div>
-        </div>`;
+        foodCarrousel.innerHTML += cardHtml(filteredArray[i]);
     }
     setBtnfunctions ();
 } );
-
-
