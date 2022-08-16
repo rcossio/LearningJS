@@ -28,11 +28,23 @@ class Food {
 }
 
 /* Asks user for permission to run the script */
-let acceptedTerms = confirm("This site is not currently working with real nutritional information. Do you still want to enter the site?")
-if (!acceptedTerms) {
-    /* Aun no vimos esto que googlee, no se si hay una mejor forma de terminar el script */
-    throw new Error("The user didn't accept to run the script");
-}
+swal({
+    title: "Accept Terms and Conditions",
+    text:"This site is not currently working with real nutritional information. Do you still want to enter the site?",
+    buttons: {
+        accept:{
+            text: "Accept",
+            value: true},
+        reject:{
+            text: "Reject",
+            value: false}
+        }
+    }).then( (acceptedTerms) =>{
+        if (!acceptedTerms) { 
+            /* Aun no vimos esto que googlee, no se si hay una mejor forma de terminar el script */
+             throw new Error("The user didn't accept to run the script");
+        } 
+    } )
 
 /* Creates foods. This will be loaded from JSON file in the future*/
 const foodObjArray = [];
@@ -87,10 +99,10 @@ function randomIndices(size,maxnum){
 function cardHtml (foodObj){
     return `
     <div class="card" style="width: 10rem">
-    <img src="${foodObj.image}" class="card-img-top" alt="Image of a food" style="height: 8rem;">
+    <img src="${foodObj.image}" class="card-img-top" alt="Image of the food ${foodObj.name}" style="height: 8rem;">
     <div class="card-body mx-auto text-center">
       <h5 class="card-title">${foodObj.name}</h5>
-      <button class="btn btn-secondary" id="button-${foodObj.name.toLowerCase()}">Agregar</a>
+      <button class="btn btn-secondary" id="button-${foodObj.name.toLowerCase()}">Add</a>
     </div>
     </div>`;
 }
@@ -132,7 +144,7 @@ function getFoodObj(food) {
     return foodObjArray.find((elem) => elem.name === food.firstToUpperCase())
 }
 
-/* Displays dash where the input is invalid */
+/* Displays dash where the input is not filled or invalid */
 function setInvalidFood(index){
     document.getElementsByClassName("proteins-span")[index].textContent = "-";
     document.getElementsByClassName("fats-span")[index].textContent = "-";
@@ -160,9 +172,21 @@ function calculateMacros(){
         }
         foodInput.style.background = null
         
-        /* Sums up macronutrients*/
+        /* Get servings */
         const foodObj = getFoodObj(food)
-        foodObj.setServings(document.getElementsByClassName("serving-span")[index].value);
+        let servingInput = document.getElementsByClassName("serving-span")[index]
+
+        /* Checks if servings are avalid */
+        if ((servingInput.value < 0) || (servingInput.value > 99)){
+            servingInput.style.background = "rgba(255,0,0,0.3)"
+            setInvalidFood(index);
+            index++;
+            continue;
+        }
+        servingInput.style.background = null
+
+        /* Sums up macronutrients*/
+        foodObj.setServings(servingInput.value);
         totalMacros.proteins += foodObj.totalProteins();
         totalMacros.fats += foodObj.totalFats();
         totalMacros.carbs += foodObj.totalCarbs();
