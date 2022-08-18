@@ -1,7 +1,6 @@
 /* 
 * DEFINITIONS 
 */
-
 String.prototype.firstToUpperCase = function () {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
@@ -16,19 +15,15 @@ class Food {
         this.servings = 0;
         this.image = imageUrl;
     }
-
     setServings(servings){ 
         this.servings = servings;
     };
-
     totalProteins(){ 
         return this.proteins*this.servings; 
     };
-
     totalFats(){ 
         return this.fats*this.servings; 
     };
-
     totalCarbs(){ 
         return this.carbs*this.servings; 
     };
@@ -53,36 +48,14 @@ function loadFoodObjArray(){
 /* 
 * RUN MAIN SCRIPT 
 */
+termsAndConditions(); /* Como es una promesa, no atrapa el error... Debe arreglarse */
 
-/* Asks user for permission to run the script */
-swal({
-    title: "Accept Terms and Conditions",
-    text:"This site is not currently working with real nutritional information. Do you still want to enter the site?",
-    buttons: {
-        accept:{
-            text: "Accept",
-            value: true},
-        reject:{
-            text: "Reject",
-            value: false}
-        }
-    }).then( (acceptedTerms) =>{
-        if (!acceptedTerms) { 
-            /* Aun no vimos esto que googlee, no se si hay una mejor forma de terminar el script */
-             throw new Error("The user didn't accept to run the script");
-        } 
-    } )
-
-/* Main global variables*/
 const foodObjArray = loadFoodObjArray();
 let foodNameArray = foodObjArray.map( (item) => item.name )
 foodNameArray.unshift("")
 
-
 setFoodOptions(foodNameArray);
-
 cleanPage();
-
 drawFoodCarrousel(foodObjArray,getArrayOfRandomIndices(4,foodObjArray.length))
 
 
@@ -90,43 +63,38 @@ drawFoodCarrousel(foodObjArray,getArrayOfRandomIndices(4,foodObjArray.length))
 /* 
 * EVENTS 
 */
+let calculateMacrosButton = document.getElementById("calculate-macros-btn");
+calculateMacrosButton.onclick = calculateMacros;
 
-/* Calculate button */
-let calculateButton = document.getElementById("calculate-macros-btn");
-calculateButton.onclick = calculateMacros;
-
-/* Load Prev settings button */
 let loadPrevSettingsBtn = document.getElementById("load-previous-foods-btn");
-loadPrevSettingsBtn.onclick = () => {null};
+loadPrevSettingsBtn.onclick = reloadPrevMealPlan;
 
-/* Browses foods */
-let inputBox = document.getElementById("searchFoodBox");
-inputBox.addEventListener("input",() => {
-    let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(inputBox.value.toLowerCase()));
-    let foodCarrousel = document.getElementById("food-carrousel")
-    foodCarrousel.innerHTML = "";
-    for (let i=0; i< Math.min(4,filteredArray.length) ; i++) {
-        foodCarrousel.innerHTML += getCardInnerHtml(filteredArray[i]);
-    }
-    setBtnfunctions ();
-} );
+let browseFoodBox = document.getElementById("searchFoodBox");
+browseFoodBox.addEventListener("input", browseFoods)
 
 
 
 /* 
 * AUXILIARY FUNCTIONS 
 */
-function getArrayOfRandomIndices(size,maxnum){
-    let indices = [];
-    while (indices.length < size) {
-        let index = Math.floor(Math.random()*maxnum);
-        if (indices.includes(index)) {
-            continue;
-        };
-        indices.push(index);
-    }    
-    return indices;
-};
+function termsAndConditions(){
+    swal({
+        title: "Accept Terms and Conditions",
+        text:"This site is not currently working with real nutritional information. Do you still want to enter the site?",
+        buttons: {
+            accept:{
+                text: "Accept",
+                value: true},
+            reject:{
+                text: "Reject",
+                value: false}
+            }
+        }).then( (acceptedTerms) =>{
+            if (!acceptedTerms) { 
+                 throw new Error("The user didn't accept to run the script");
+            } 
+        } )
+}
 
 
 function setFoodOptions(foodNameArray){
@@ -135,7 +103,6 @@ function setFoodOptions(foodNameArray){
         foodDatalist.innerHTML += `<option>${foodName}</option>`;
     }
 }
-
 
 function cleanPage() {
     document.getElementById("searchFoodBox").value = null;
@@ -147,6 +114,17 @@ function cleanPage() {
     }
 }
 
+function getArrayOfRandomIndices(size,maxnum){
+    let indices = [];
+    while (indices.length < size) {
+        let index = Math.floor(Math.random()*maxnum);
+        if (indices.includes(index)) {
+            continue;
+        };
+        indices.push(index);
+    }    
+    return indices;
+};
 
 function getCardInnerHtml (foodObj){
     return `
@@ -160,32 +138,46 @@ function getCardInnerHtml (foodObj){
 }
 
 
+function browseFoods() {
+    let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(browseFoodBox.value.toLowerCase()));
+    let size = Math.min(4,filteredArray.length)
+    let maxnum = filteredArray.length
+    drawFoodCarrousel(filteredArray, getArrayOfRandomIndices(size,maxnum) )
+};
+
 function drawFoodCarrousel(foodObjArray,indicesArray){
     let foodCarrousel = document.getElementById("food-carrousel");
+    foodCarrousel.innerHTML = "";
     for (let index of indicesArray) {
         foodCarrousel.innerHTML += getCardInnerHtml(foodObjArray[index]);
     }
-    setBtnfunctions ();
+    setAddButtonsEvents (); 
 }
 
-
-function setBtnfunctions (){
+function setAddButtonsEvents (){
     for (let foodName of foodNameArray) {
         let button = document.getElementById("button-"+foodName.toLowerCase());
         if (!(button === null)) {
-            button.onclick = () => {
-                for (let i=0; i<5; i++) {
-                    let inputBox = document.getElementsByClassName("food-selection")[i];
-                    if (inputBox.value === ""){
-                        inputBox.value = foodName;
-                        document.getElementsByClassName("serving-span")[i].value = 1;
-                        break
-                    }
-                }
-            };
+            button.onclick = () => { placeFoodOnEmptyBox (foodName) };
         }
     }
 }
+
+function placeFoodOnEmptyBox (foodName) {
+    let foodInMealArray = readMealPlan().map((elem) => elem.food)
+    if (foodInMealArray.includes(foodName)){
+        swal(`${foodName} is already in meal plan! Choose the quantity of servings.`)
+        return 
+    }
+    for (let i=0; i<5; i++) {
+        let browseFoodBox = document.getElementsByClassName("food-selection")[i];
+        if (browseFoodBox.value === ""){
+            browseFoodBox.value = foodName;
+            document.getElementsByClassName("serving-span")[i].value = 1;
+            break
+        }
+    }
+};
 
 
 function getFoodObjFromName(food) {
@@ -267,8 +259,8 @@ function calculateMacros(){
 
     for (let entry of mealPlan){
 
+        markInvalidEntries(entry);
         if (invalidEntry(entry)) {
-            markInvalidEntries(entry);
             continue
         }
 
@@ -288,3 +280,13 @@ function calculateMacros(){
     
     document.getElementById("calories-calculation").textContent = "The quantity of calories in this plan is " + totalMacros.calories() + " with " + totalMacros.proteins + " proteins, " + totalMacros.fats + " fats, and " + totalMacros.carbs + " carbs.";
 }
+
+
+function reloadPrevMealPlan(){
+    mealPlan = JSON.parse(localStorage.getItem("mealPlan"))
+    for (let entry of mealPlan){
+        document.getElementsByClassName("food-selection")[entry.index].value= entry.food
+        document.getElementsByClassName("serving-span")[entry.index].value= entry.servings
+    }
+    calculateMacros();
+};
