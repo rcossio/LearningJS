@@ -1,10 +1,11 @@
+/* 
+* DEFINITIONS 
+*/
 
-/* Method to transform string to lowercase with first char in uppercase  */
 String.prototype.firstToUpperCase = function () {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
-/* Saves & retrieves information about foods*/
 class Food {
     constructor (name, proteins, fats, carbs,imageUrl) {
         /* Proteins, fats and carbs are Per Serving Size */
@@ -16,16 +17,42 @@ class Food {
         this.image = imageUrl;
     }
 
-    setServings(servings){
+    setServings(servings){ 
         this.servings = servings;
     };
 
-    totalProteins(){ return this.proteins*this.servings; };
+    totalProteins(){ 
+        return this.proteins*this.servings; 
+    };
 
-    totalFats(){ return this.fats*this.servings; };
+    totalFats(){ 
+        return this.fats*this.servings; 
+    };
 
-    totalCarbs(){ return this.carbs*this.servings; };
+    totalCarbs(){ 
+        return this.carbs*this.servings; 
+    };
 }
+
+/* 
+* SIMULATE BACKEND 
+*/
+function loadFoodObjArray(){
+    let foodObjArray = []
+    foodObjArray.push( new Food("Guiso", 11, 21, 31,"./img/guiso.webp")   )
+    foodObjArray.push( new Food("Tacos", 12, 22, 32,"./img/tacos.webp")   )
+    foodObjArray.push( new Food("Lasagna", 13, 23, 33,"./img/lasagna.webp") )
+    foodObjArray.push( new Food("Pizza", 14, 24, 34,"./img/pizza.webp")   )
+    foodObjArray.push( new Food("Ravioles", 15, 25, 35,"./img/ravioles.webp"))
+    foodObjArray.push( new Food("Ensalada", 16, 26, 36,"./img/ensalada.webp"))
+    foodObjArray.push( new Food("Fideos", 17, 27, 37,"./img/fideos.webp")  )
+    return foodObjArray;
+}
+
+
+/* 
+* RUN MAIN SCRIPT 
+*/
 
 /* Asks user for permission to run the script */
 swal({
@@ -46,44 +73,50 @@ swal({
         } 
     } )
 
-/* Creates foods. This will be loaded from JSON file in the future*/
-const foodObjArray = [];
-foodObjArray.push( new Food("Guiso", 11, 21, 31,"./img/guiso.webp")   )
-foodObjArray.push( new Food("Tacos", 12, 22, 32,"./img/tacos.webp")   )
-foodObjArray.push( new Food("Lasagna", 13, 23, 33,"./img/lasagna.webp") )
-foodObjArray.push( new Food("Pizza", 14, 24, 34,"./img/pizza.webp")   )
-foodObjArray.push( new Food("Ravioles", 15, 25, 35,"./img/ravioles.webp"))
-foodObjArray.push( new Food("Ensalada", 16, 26, 36,"./img/ensalada.webp"))
-foodObjArray.push( new Food("Fideos", 17, 27, 37,"./img/fideos.webp")  )
-
-/* Define array of food names*/
+/* Main global variables*/
+const foodObjArray = loadFoodObjArray();
 let foodNameArray = foodObjArray.map( (item) => item.name )
 foodNameArray.unshift("")
 
-/* Loads food options */
-let foodDatalist = document.getElementById("food-options");
-for (let foodName of foodNameArray) {
-    foodDatalist.innerHTML += `<option>${foodName}</option>`;
-}
 
-/* Cleans forms on page reload */
-document.getElementById("searchFoodBox").value = null;
-for (const node of document.getElementsByClassName("food-selection")){
-    node.value=null;
-}
-for (const node of document.getElementsByClassName("serving-span")){
-    node.value=null;
-}
+setFoodOptions(foodNameArray);
 
-/* Shows initial foods randomly*/
-let foodCarrousel = document.getElementById("food-carrousel");
-for (let index of randomIndices(4,foodObjArray.length)) {
-    foodCarrousel.innerHTML += cardHtml(foodObjArray[index]);
-}
-setBtnfunctions ();
+cleanPage();
 
-/* Get array of random indices */
-function randomIndices(size,maxnum){
+drawFoodCarrousel(foodObjArray,getArrayOfRandomIndices(4,foodObjArray.length))
+
+
+
+/* 
+* EVENTS 
+*/
+
+/* Calculate button */
+let calculateButton = document.getElementById("calculate-macros-btn");
+calculateButton.onclick = calculateMacros;
+
+/* Load Prev settings button */
+let loadPrevSettingsBtn = document.getElementById("load-previous-foods-btn");
+loadPrevSettingsBtn.onclick = () => {null};
+
+/* Browses foods */
+let inputBox = document.getElementById("searchFoodBox");
+inputBox.addEventListener("input",() => {
+    let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(inputBox.value.toLowerCase()));
+    let foodCarrousel = document.getElementById("food-carrousel")
+    foodCarrousel.innerHTML = "";
+    for (let i=0; i< Math.min(4,filteredArray.length) ; i++) {
+        foodCarrousel.innerHTML += getCardInnerHtml(filteredArray[i]);
+    }
+    setBtnfunctions ();
+} );
+
+
+
+/* 
+* AUXILIARY FUNCTIONS 
+*/
+function getArrayOfRandomIndices(size,maxnum){
     let indices = [];
     while (indices.length < size) {
         let index = Math.floor(Math.random()*maxnum);
@@ -95,8 +128,27 @@ function randomIndices(size,maxnum){
     return indices;
 };
 
-/* Defines string of a card */
-function cardHtml (foodObj){
+
+function setFoodOptions(foodNameArray){
+    let foodDatalist = document.getElementById("food-options");
+    for (let foodName of foodNameArray) {
+        foodDatalist.innerHTML += `<option>${foodName}</option>`;
+    }
+}
+
+
+function cleanPage() {
+    document.getElementById("searchFoodBox").value = null;
+    for (const node of document.getElementsByClassName("food-selection")){
+        node.value=null;
+    }
+    for (const node of document.getElementsByClassName("serving-span")){
+        node.value=null;
+    }
+}
+
+
+function getCardInnerHtml (foodObj){
     return `
     <div class="card" style="width: 10rem">
     <img src="${foodObj.image}" class="card-img-top" alt="Image of the food ${foodObj.name}" style="height: 8rem;">
@@ -107,7 +159,16 @@ function cardHtml (foodObj){
     </div>`;
 }
 
-/* Food buttons add foods to list */
+
+function drawFoodCarrousel(foodObjArray,indicesArray){
+    let foodCarrousel = document.getElementById("food-carrousel");
+    for (let index of indicesArray) {
+        foodCarrousel.innerHTML += getCardInnerHtml(foodObjArray[index]);
+    }
+    setBtnfunctions ();
+}
+
+
 function setBtnfunctions (){
     for (let foodName of foodNameArray) {
         let button = document.getElementById("button-"+foodName.toLowerCase());
@@ -126,90 +187,104 @@ function setBtnfunctions (){
     }
 }
 
-/* Runs main function by pressing button (lo vimos en el afterclass del miercoles) */
-let calculateButton = document.getElementById("calculateMacros-btn");
-calculateButton.onclick = calculateMacros;
 
-/* Returns true if input is acceptable (food or empty) */
-function foodChecker(food) {
-    if (foodNameArray.includes(food.firstToUpperCase())) {
-        return true
-    } else {
-        return false
-    }
-};
-
-/* Finds food object from its name */
-function getFoodObj(food) {
+function getFoodObjFromName(food) {
     return foodObjArray.find((elem) => elem.name === food.firstToUpperCase())
 }
 
-/* Displays dash where the input is not filled or invalid */
-function setInvalidFood(index){
+
+function parseFood(food) {
+    if (foodNameArray.includes(food.firstToUpperCase())) {
+        return food
+    } else {
+        return ""
+    }
+};
+
+
+function parseServings(servings) {
+    if ((servings < 0) || (servings > 99) || (servings == "") ){
+        return ""
+    } else{
+        return servings
+    }
+}
+
+
+function readMealPlan(){
+    let mealPlan = []
+    let index = 0;
+    
+    for (let foodInput of document.getElementsByClassName("food-selection")) {
+        let food = parseFood(foodInput.value);
+        let servings = parseServings(document.getElementsByClassName("serving-span")[index].value)
+
+        mealPlan.push({food: food, servings: servings, index:index})
+
+        index++;
+    };
+
+    return mealPlan;
+};
+
+
+function invalidEntry(entry){
+    return ((entry.food == "") || (entry.servings == ""))
+};
+
+
+function markInvalidEntries(entry){
+    let backgroundColor = null;
+    if (entry.food == "") {
+        backgroundColor = "rgba(255,0,0,0.3)"
+        displayDashesInInvalidRow(entry.index)
+    }
+    document.getElementsByClassName("food-selection")[entry.index].style.background = backgroundColor
+
+    backgroundColor = null;
+    if (entry.servings == "") {
+        backgroundColor = "rgba(255,0,0,0.3)"
+        displayDashesInInvalidRow(entry.index)
+    } 
+    document.getElementsByClassName("serving-span")[entry.index].style.background = backgroundColor
+};
+
+
+function displayDashesInInvalidRow(index){
     document.getElementsByClassName("proteins-span")[index].textContent = "-";
     document.getElementsByClassName("fats-span")[index].textContent = "-";
     document.getElementsByClassName("carbs-span")[index].textContent = "-";
 }
 
-/* Reading the data and calculating macronutrients*/
-function calculateMacros(){
 
-    let index = 0;
+function calculateMacros(){
+    let mealPlan = readMealPlan();
     const totalMacros = { proteins: 0, fats:0, carbs:0, 
         calories: function () { return (this.proteins + this.carbs) * 4 + this.fats * 9; }
     }
 
-    for (let foodInput of document.getElementsByClassName("food-selection")) {
-        let food = foodInput.value;
-        let passed = foodChecker(food);
-    
-        /* Skips when input is invalid */
-        if ((food == "") || (!passed)) {
-            foodInput.style.background = "rgba(255,0,0,0.3)"
-            setInvalidFood(index);
-            index++;
-            continue;
-        }
-        foodInput.style.background = null
-        
-        /* Get servings */
-        const foodObj = getFoodObj(food)
-        let servingInput = document.getElementsByClassName("serving-span")[index]
+    localStorage.setItem("mealPlan",JSON.stringify(mealPlan))
 
-        /* Checks if servings are avalid */
-        if ((servingInput.value < 0) || (servingInput.value > 99)){
-            servingInput.style.background = "rgba(255,0,0,0.3)"
-            setInvalidFood(index);
-            index++;
-            continue;
+    for (let entry of mealPlan){
+
+        if (invalidEntry(entry)) {
+            markInvalidEntries(entry);
+            continue
         }
-        servingInput.style.background = null
+
+        const foodObj = getFoodObjFromName(entry.food)
+        foodObj.setServings(entry.servings);
 
         /* Sums up macronutrients*/
-        foodObj.setServings(servingInput.value);
         totalMacros.proteins += foodObj.totalProteins();
         totalMacros.fats += foodObj.totalFats();
         totalMacros.carbs += foodObj.totalCarbs();
-    
+
         /* Displays values in the table */
-        document.getElementsByClassName("proteins-span")[index].textContent = foodObj.totalProteins();
-        document.getElementsByClassName("fats-span")[index].textContent = foodObj.totalFats();
-        document.getElementsByClassName("carbs-span")[index].textContent = foodObj.totalCarbs();
-    
-        index++;
-    }
+        document.getElementsByClassName("proteins-span")[entry.index].textContent = foodObj.totalProteins();
+        document.getElementsByClassName("fats-span")[entry.index].textContent = foodObj.totalFats();
+        document.getElementsByClassName("carbs-span")[entry.index].textContent = foodObj.totalCarbs();
+    };
     
     document.getElementById("calories-calculation").textContent = "The quantity of calories in this plan is " + totalMacros.calories() + " with " + totalMacros.proteins + " proteins, " + totalMacros.fats + " fats, and " + totalMacros.carbs + " carbs.";
 }
-
-/* Browses foods */
-let inputBox = document.getElementById("searchFoodBox");
-inputBox.addEventListener("input",() => {
-    let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(inputBox.value.toLowerCase()));
-    let foodCarrousel = document.getElementById("food-carrousel")
-    foodCarrousel.innerHTML = "";
-    for (let i=0; i< Math.min(4,filteredArray.length) ; i++) {
-        foodCarrousel.innerHTML += cardHtml(filteredArray[i]);
-    }
-    setBtnfunctions ();
-} );
