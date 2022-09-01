@@ -1,7 +1,8 @@
 /* 
 * DEFINITIONS 
 */
-String.prototype.firstToUpperCase = function () {
+/* REVIEW: If I write this as an arrow function it stops working... why? */
+String.prototype.firstToUpperCase = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
@@ -48,7 +49,7 @@ function loadFoodObjArray(){
 /* 
 * RUN MAIN SCRIPT 
 */
-termsAndConditions(); /* Como es una promesa, no atrapa el error... Debe arreglarse */
+termsAndConditions(); 
 
 const foodObjArray = loadFoodObjArray();
 let foodNameArray = foodObjArray.map( (item) => item.name )
@@ -77,6 +78,11 @@ browseFoodBox.addEventListener("input", browseFoods)
 /* 
 * AUXILIARY FUNCTIONS 
 */
+
+function stopScript (){
+    throw new Error("The user didn't accept to run the script");
+}
+
 function termsAndConditions(){
     swal({
         title: "Accept Terms and Conditions",
@@ -89,11 +95,8 @@ function termsAndConditions(){
                 text: "Reject",
                 value: false}
             }
-        }).then( (acceptedTerms) =>{
-            if (!acceptedTerms) { 
-                 throw new Error("The user didn't accept to run the script");
-            } 
-        } )
+        }).then( (acceptedTerms) => { (!acceptedTerms) && stopScript(); } ) 
+        /* BUG: Script is stopped in a promise, so it will run anyways */
 }
 
 
@@ -159,7 +162,7 @@ function setAddButtonsEvents (){
         let button = document.getElementById("button-"+foodName.toLowerCase());
         if (!(button === null)) {
             button.onclick = () => { placeFoodOnEmptyBox (foodName) };
-        }
+        } 
     }
 }
 
@@ -186,20 +189,12 @@ function getFoodObjFromName(food) {
 
 
 function parseFood(food) {
-    if (foodNameArray.includes(food.firstToUpperCase())) {
-        return food
-    } else {
-        return ""
-    }
+    return foodNameArray.includes(food.firstToUpperCase()) ? food : "";
 };
 
 
 function parseServings(servings) {
-    if ((servings < 0) || (servings > 99) || (servings == "") ){
-        return ""
-    } else{
-        return servings
-    }
+    return ((servings < 0) || (servings > 99) || (servings == ""))  ? "" : servings;
 }
 
 
@@ -226,26 +221,18 @@ function invalidEntry(entry){
 
 
 function markInvalidEntries(entry){
-    let backgroundColor = null;
-    if (entry.food == "") {
-        backgroundColor = "rgba(255,0,0,0.3)"
-        displayDashesInInvalidRow(entry.index)
-    }
-    document.getElementsByClassName("food-selection")[entry.index].style.background = backgroundColor
-
-    backgroundColor = null;
-    if (entry.servings == "") {
-        backgroundColor = "rgba(255,0,0,0.3)"
-        displayDashesInInvalidRow(entry.index)
-    } 
-    document.getElementsByClassName("serving-span")[entry.index].style.background = backgroundColor
+    let reddishColor = "rgba(255,0,0,0.3)"
+    document.getElementsByClassName("food-selection")[entry.index].style.background = (entry.food)? null: reddishColor;
+    document.getElementsByClassName("serving-span")[entry.index].style.background = (entry.servings)? null: reddishColor;
+    fillInvalidRow(entry.index);
 };
 
 
-function displayDashesInInvalidRow(index){
-    document.getElementsByClassName("proteins-span")[index].textContent = "-";
-    document.getElementsByClassName("fats-span")[index].textContent = "-";
-    document.getElementsByClassName("carbs-span")[index].textContent = "-";
+function fillInvalidRow(index){
+    let dashString = "-"
+    document.getElementsByClassName("proteins-span")[index].textContent = dashString;
+    document.getElementsByClassName("fats-span")[index].textContent = dashString;
+    document.getElementsByClassName("carbs-span")[index].textContent = dashString;
 }
 
 
