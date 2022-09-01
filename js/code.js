@@ -9,6 +9,9 @@ String.prototype.firstToUpperCase = function() {
 let DateTime=luxon.DateTime;
 let foodObjArray;
 let foodNameArray;
+let calculateMacrosButton;
+let loadPrevSettingsBtn;
+let browseFoodBox;
 
 class Food {
     constructor (name, proteins, fats, carbs,imageUrl) {
@@ -62,7 +65,7 @@ Swal.fire({
     })
     .then ((result) => { result.isConfirmed? runMainScript(): stopScript()})
 
-    
+
 function runMainScript(){
     foodObjArray = loadFoodObjArray();
     foodNameArray = foodObjArray.map( (item) => item.name )
@@ -77,13 +80,13 @@ function runMainScript(){
     /* 
     * EVENTS 
     */
-    let calculateMacrosButton = document.getElementById("calculate-macros-btn");
+    calculateMacrosButton = document.getElementById("calculate-macros-btn");
     calculateMacrosButton.onclick = calculateMacros;
 
-    let loadPrevSettingsBtn = document.getElementById("load-previous-foods-btn");
+    loadPrevSettingsBtn = document.getElementById("load-previous-foods-btn");
     loadPrevSettingsBtn.onclick = reloadPrevMealPlan;
 
-    let browseFoodBox = document.getElementById("searchFoodBox");
+    browseFoodBox = document.getElementById("searchFoodBox");
     browseFoodBox.addEventListener("input", browseFoods)
 };
 
