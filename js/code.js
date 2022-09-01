@@ -6,6 +6,8 @@ String.prototype.firstToUpperCase = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
 
+let DateTime=luxon.DateTime;
+
 class Food {
     constructor (name, proteins, fats, carbs,imageUrl) {
         /* Proteins, fats and carbs are Per Serving Size */
@@ -84,18 +86,13 @@ function stopScript (){
 }
 
 function termsAndConditions(){
-    swal({
-        title: "Accept Terms and Conditions",
+    Swal.fire({
+        title: 'Accept Terms and Conditions',
         text:"This site is not currently working with real nutritional information. Do you still want to enter the site?",
-        buttons: {
-            accept:{
-                text: "Accept",
-                value: true},
-            reject:{
-                text: "Reject",
-                value: false}
-            }
-        }).then( (acceptedTerms) => { (!acceptedTerms) && stopScript(); } ) 
+        showDenyButton: true,
+        confirmButtonText: 'Accept',
+        denyButtonText: `Reject`,
+      }).then((result) => { (result.isDenied) && stopScript();} )
         /* BUG: Script is stopped in a promise, so it will run anyways */
 }
 
@@ -167,7 +164,7 @@ function setAddButtonsEvents (){
 }
 
 function placeFoodOnEmptyBox (foodName) {
-    let foodInMealArray = readMealPlan().map((elem) => elem.food)
+    let foodInMealArray = readMealPlan().content.map((elem) => elem.food)
     if (foodInMealArray.includes(foodName)){
         swal(`${foodName} is already in meal plan! Choose the quantity of servings.`)
         return 
@@ -199,14 +196,18 @@ function parseServings(servings) {
 
 
 function readMealPlan(){
-    let mealPlan = []
+    const mealPlan = {
+        date: DateTime.now().toLocaleString(DateTime.DATE_MED),
+        content: [] 
+    };
+
     let index = 0;
     
     for (let foodInput of document.getElementsByClassName("food-selection")) {
         let food = parseFood(foodInput.value);
         let servings = parseServings(document.getElementsByClassName("serving-span")[index].value)
 
-        mealPlan.push({food: food, servings: servings, index:index})
+        mealPlan.content.push({food: food, servings: servings, index:index})
 
         index++;
     };
@@ -244,7 +245,7 @@ function calculateMacros(){
 
     localStorage.setItem("mealPlan",JSON.stringify(mealPlan))
 
-    for (let entry of mealPlan){
+    for (let entry of mealPlan.content){
 
         markInvalidEntries(entry);
         if (invalidEntry(entry)) {
@@ -271,9 +272,20 @@ function calculateMacros(){
 
 function reloadPrevMealPlan(){
     mealPlan = JSON.parse(localStorage.getItem("mealPlan"))
-    for (let entry of mealPlan){
+    for (let entry of mealPlan.content){
         document.getElementsByClassName("food-selection")[entry.index].value= entry.food
         document.getElementsByClassName("serving-span")[entry.index].value= entry.servings
     }
     calculateMacros();
+
+    Toastify({
+        text: `Loaded settings from ${mealPlan.date}`,
+        duration: 2000,
+        gravity: "top", // `top` or `bottom`
+        position: "right", // `left`, `center` or `right`
+        stopOnFocus: false, // Prevents dismissing of toast on hover
+        style: {
+          background: "linear-gradient(to right, #070080, #00c4ff)",
+        },
+      }).showToast();
 };
