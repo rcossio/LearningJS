@@ -5,6 +5,9 @@
 String.prototype.firstToUpperCase = function() {
 	return this.charAt(0).toUpperCase() + this.slice(1).toLowerCase();
 };
+String.prototype.stdForm = function() {
+	return this.firstToUpperCase().replaceAll(" ","-");
+};
 
 let DateTime=luxon.DateTime;
 let foodObjArray;
@@ -38,19 +41,29 @@ class Food {
 }
 
 /* 
-* SIMULATE BACKEND 
+* DOWNLOAD DATABASE 
 */
 function loadFoodObjArray(){
-    let foodObjArray = []
-    foodObjArray.push( new Food("Guiso", 11, 21, 31,"./img/guiso.webp")   )
-    foodObjArray.push( new Food("Tacos", 12, 22, 32,"./img/tacos.webp")   )
-    foodObjArray.push( new Food("Lasagna", 13, 23, 33,"./img/lasagna.webp") )
-    foodObjArray.push( new Food("Pizza", 14, 24, 34,"./img/pizza.webp")   )
-    foodObjArray.push( new Food("Ravioles", 15, 25, 35,"./img/ravioles.webp"))
-    foodObjArray.push( new Food("Ensalada", 16, 26, 36,"./img/ensalada.webp"))
-    foodObjArray.push( new Food("Fideos", 17, 27, 37,"./img/fideos.webp")  )
-    return foodObjArray;
+    const URLAPI = "https://api.spoonacular.com/recipes/complexSearch?number=20&apiKey=f24144798ba44cd7840463480ef1d439"
+    return fetch(URLAPI).
+    then( (response) => response.json()).
+    then( (foodJSON) => 
+        foodJSON.results.map( food => 
+            {
+            let nutritionalInfo = getNutritionalInfo(food.id) /* The variable in this line is not being implemented yet*/
+            return new Food(food.title, 1, 2, 3,food.image)
+            }
+        )
+    )
 }
+
+/* This function is not implemented yet */
+function getNutritionalInfo(id){
+    URL=`https://api.spoonacular.com/recipes/${id}/nutritionWidget.json?apiKey=f24144798ba44cd7840463480ef1d439`
+    return fetch(URL).
+    then( (response) => response.json() )
+}
+
 
 
 /* 
@@ -66,16 +79,14 @@ Swal.fire({
     .then ((result) => { result.isConfirmed? runMainScript(): stopScript()})
 
 
-function runMainScript(){
-    foodObjArray = loadFoodObjArray();
+async function runMainScript(){
+    foodObjArray = await loadFoodObjArray();
     foodNameArray = foodObjArray.map( (item) => item.name )
     foodNameArray.unshift("")
 
     setFoodOptions(foodNameArray);
     cleanPage();
     drawFoodCarrousel(foodObjArray,getArrayOfRandomIndices(4,foodObjArray.length))
-
-
 
     /* 
     * EVENTS 
@@ -135,14 +146,14 @@ function getCardInnerHtml (foodObj){
     <img src="${foodObj.image}" class="card-img-top" alt="Image of the food ${foodObj.name}" style="height: 8rem;">
     <div class="card-body mx-auto text-center">
       <h5 class="card-title">${foodObj.name}</h5>
-      <button class="btn btn-secondary" id="button-${foodObj.name.toLowerCase()}">Add</a>
+      <button class="btn btn-secondary" id="button-${foodObj.name.stdForm()}">Add</a>
     </div>
     </div>`;
 }
 
 
 function browseFoods() {
-    let filteredArray = foodObjArray.filter((elem) => elem.name.toLowerCase().includes(browseFoodBox.value.toLowerCase()));
+    let filteredArray = foodObjArray.filter((elem) => elem.name.stdForm().includes(browseFoodBox.value.stdForm()));
     let size = Math.min(4,filteredArray.length)
     let maxnum = filteredArray.length
     drawFoodCarrousel(filteredArray, getArrayOfRandomIndices(size,maxnum) )
@@ -159,7 +170,7 @@ function drawFoodCarrousel(foodObjArray,indicesArray){
 
 function setAddButtonsEvents (){
     for (let foodName of foodNameArray) {
-        let button = document.getElementById("button-"+foodName.toLowerCase());
+        let button = document.getElementById("button-"+foodName.stdForm());
         if (!(button === null)) {
             button.onclick = () => { placeFoodOnEmptyBox (foodName) };
         } 
@@ -167,9 +178,9 @@ function setAddButtonsEvents (){
 }
 
 function placeFoodOnEmptyBox (foodName) {
-    let foodInMealArray = readMealPlan().content.map((elem) => elem.food)
-    if (foodInMealArray.includes(foodName)){
-        swal(`${foodName} is already in meal plan! Choose the quantity of servings.`)
+    let foodInMealArray = readMealPlan().content.map((elem) => elem.food.stdForm() )
+    if (foodInMealArray.includes(foodName.stdForm())){
+        Swal.fire(`${foodName} is already in meal plan! Choose the quantity of servings.`)
         return 
     }
     for (let i=0; i<5; i++) {
@@ -184,12 +195,12 @@ function placeFoodOnEmptyBox (foodName) {
 
 
 function getFoodObjFromName(food) {
-    return foodObjArray.find((elem) => elem.name === food.firstToUpperCase())
+    return foodObjArray.find((elem) => elem.name.stdForm() === food.stdForm())
 }
 
 
 function parseFood(food) {
-    return foodNameArray.includes(food.firstToUpperCase()) ? food : "";
+    return foodNameArray.map(name => name.stdForm()).includes(food.stdForm()) ? food : "";
 };
 
 
